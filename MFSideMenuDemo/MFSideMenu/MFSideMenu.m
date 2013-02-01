@@ -15,7 +15,7 @@
 }
 
 @property (nonatomic, assign, readwrite) UINavigationController *navigationController;
-@property (nonatomic, strong, readwrite) UITableViewController *sideMenuController;
+@property (nonatomic, strong, readwrite) UI</objc>ViewController *sideMenuController;
 
 @property (nonatomic, assign) MFSideMenuLocation menuSide;
 @property (nonatomic, assign) MFSideMenuOptions options;
@@ -98,10 +98,10 @@
     [recognizer setDelegate:menu];
     [controller.view addGestureRecognizer:recognizer];
     
-    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]
-                                             initWithTarget:menu action:@selector(navigationControllerTapped:)];
-    [tapRecognizer setDelegate:menu];
-    [controller.view addGestureRecognizer:tapRecognizer];
+//    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]
+//                                             initWithTarget:menu action:@selector(navigationControllerTapped:)];
+//    [tapRecognizer setDelegate:menu];
+//    [controller.view addGestureRecognizer:tapRecognizer];
     
     [[NSNotificationCenter defaultCenter] addObserver:menu
                                              selector:@selector(statusBarOrientationDidChange:)

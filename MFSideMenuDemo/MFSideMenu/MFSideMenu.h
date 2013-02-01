@@ -44,7 +44,7 @@ typedef void (^MFSideMenuStateEventBlock)(MFSideMenuStateEvent);
 @interface MFSideMenu : NSObject<UIGestureRecognizerDelegate>
 
 @property (nonatomic, readonly) UINavigationController *navigationController;
-@property (nonatomic, strong, readonly) UITableViewController *sideMenuController;
+@property (nonatomic, strong, readonly) UIViewController *sideMenuController;
 @property (nonatomic, assign) MFSideMenuState menuState;
 @property (nonatomic, assign) MFSideMenuPanMode panMode;
 
