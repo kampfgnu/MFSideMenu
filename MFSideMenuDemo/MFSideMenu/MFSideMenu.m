@@ -131,7 +131,7 @@
     UIView *windowRootView = self.rootViewController.view;
     UIView *containerView = windowRootView.superview;
     
-    [containerView insertSubview:menuView aboveSubview:windowRootView];
+    [containerView insertSubview:menuView belowSubview:windowRootView];
     menuView.alpha = 0.0f;
     CGRect f = menuView.frame;
     f.origin.y = 64;
@@ -553,6 +553,12 @@
 //        [self setRootControllerOffset:xPosition];
     } completion:^(BOOL finished) {
         [self setupSideMenuBarButtonItem];
+        
+        UIView *menuView = self.sideMenuController.view;
+        UIView *windowRootView = self.rootViewController.view;
+        UIView *containerView = windowRootView.superview;
+        
+        (self.menuState == MFSideMenuStateHidden) ? [containerView bringSubviewToFront:windowRootView] : [containerView bringSubviewToFront:menuView];
         
         // disable user interaction on the current view controller if the menu is visible
         self.navigationController.topViewController.view.userInteractionEnabled = (self.menuState == MFSideMenuStateHidden);
