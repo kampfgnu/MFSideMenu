@@ -15,7 +15,7 @@
 }
 
 @property (nonatomic, assign, readwrite) UINavigationController *navigationController;
-@property (nonatomic, strong, readwrite) UI</objc>ViewController *sideMenuController;
+@property (nonatomic, strong, readwrite) UIViewController *sideMenuController;
 
 @property (nonatomic, assign) MFSideMenuLocation menuSide;
 @property (nonatomic, assign) MFSideMenuOptions options;
@@ -131,7 +131,13 @@
     UIView *windowRootView = self.rootViewController.view;
     UIView *containerView = windowRootView.superview;
     
-    [containerView insertSubview:menuView belowSubview:windowRootView];
+    [containerView insertSubview:menuView aboveSubview:windowRootView];
+    menuView.alpha = 0.0f;
+    CGRect f = menuView.frame;
+    f.origin.y = 64;
+    menuView.frame = f;
+    
+    return;
     
     [menuView setTranslatesAutoresizingMaskIntoConstraints:NO];
     self.topConstraint = [[self class] edgeConstraint:NSLayoutAttributeTop subview:menuView];
@@ -405,6 +411,8 @@
 #pragma mark - Menu Rotation
 
 - (void) orientSideMenuFromStatusBar {
+    return;
+    
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
     CGSize statusBarSize = [[UIApplication sharedApplication] statusBarFrame].size;
     CGSize windowSize = self.navigationController.view.window.bounds.size;
@@ -507,27 +515,42 @@
     // notify that the menu state event is starting
     [self sendMenuStateEventNotification:(hidden ? MFSideMenuStateEventMenuWillClose : MFSideMenuStateEventMenuWillOpen)];
     
-    CGFloat x = ABS([self pointAdjustedForInterfaceOrientation:self.rootViewController.view.frame.origin].x);
+//    CGFloat x = ABS([self pointAdjustedForInterfaceOrientation:self.rootViewController.view.frame.origin].x);
+//    
+//    CGFloat navigationControllerXPosition = (self.menuSide == MFSideMenuLocationLeft) ? kMFSideMenuSidebarWidth : -1*kMFSideMenuSidebarWidth;
+//    CGFloat animationPositionDelta = (hidden) ? x : (navigationControllerXPosition  - x);
     
-    CGFloat navigationControllerXPosition = (self.menuSide == MFSideMenuLocationLeft) ? kMFSideMenuSidebarWidth : -1*kMFSideMenuSidebarWidth;
-    CGFloat animationPositionDelta = (hidden) ? x : (navigationControllerXPosition  - x);
+    CGFloat duration = 0.2f;
     
-    CGFloat duration;
-    
-    if(ABS(self.panGestureVelocity) > 1.0) {
-        // try to continue the animation at the speed the user was swiping
-        duration = animationPositionDelta / ABS(self.panGestureVelocity);
-    } else {
-        // no swipe was used, user tapped the bar button item
-        CGFloat animationDurationPerPixel = kMFSideMenuAnimationDuration / navigationControllerXPosition;
-        duration = animationDurationPerPixel * animationPositionDelta;
-    }
-    
-    if(duration > kMFSideMenuAnimationMaxDuration) duration = kMFSideMenuAnimationMaxDuration;
+//    if(ABS(self.panGestureVelocity) > 1.0) {
+//        // try to continue the animation at the speed the user was swiping
+//        duration = animationPositionDelta / ABS(self.panGestureVelocity);
+//    } else {
+//        // no swipe was used, user tapped the bar button item
+//        CGFloat animationDurationPerPixel = kMFSideMenuAnimationDuration / navigationControllerXPosition;
+//        duration = animationDurationPerPixel * animationPositionDelta;
+//    }
+//    
+//    if(duration > kMFSideMenuAnimationMaxDuration) duration = kMFSideMenuAnimationMaxDuration;
     
     [UIView animateWithDuration:duration animations:^{
-        CGFloat xPosition = (hidden) ? 0 : navigationControllerXPosition;
-        [self setRootControllerOffset:xPosition];
+        UIView *menuView = self.sideMenuController.view;
+
+        if (! hidden) {
+            menuView.alpha = 1.f;
+            
+            self.navigationController.topViewController.view.alpha = 0.5;
+//            self.navigationController.sideMenu.sideMenuController.view.alpha = 1.f;
+//            rootController.view.alpha = 0.0;
+        }
+        else {
+            menuView.alpha = 0.f;
+            self.navigationController.topViewController.view.alpha = 1.0;
+//            rootController.view.alpha = 1.0;
+        }
+        
+//        CGFloat xPosition = (hidden) ? 0 : navigationControllerXPosition;
+//        [self setRootControllerOffset:xPosition];
     } completion:^(BOOL finished) {
         [self setupSideMenuBarButtonItem];
         
@@ -576,7 +599,6 @@
             frame.origin.y = xOffset;
             break;
     }
-    
     rootController.view.frame = frame;
 }
 
