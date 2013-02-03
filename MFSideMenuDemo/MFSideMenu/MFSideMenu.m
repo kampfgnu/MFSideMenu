@@ -222,7 +222,7 @@
 
 - (UIBarButtonItem *)menuBarButtonItem {
     return [[UIBarButtonItem alloc]
-            initWithImage:[UIImage imageNamed:@"menu-icon.png"] style:UIBarButtonItemStyleBordered
+            initWithImage:[UIImage imageNamed:@"menu-icon-inverted.png"] style:UIBarButtonItemStyleBordered
             target:self
             action:@selector(toggleSideMenuPressed:)];
 }
