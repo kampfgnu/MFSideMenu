@@ -65,6 +65,10 @@ typedef void (^MFSideMenuStateEventBlock)(MFSideMenuStateEvent);
                               options:(MFSideMenuOptions)options
                               panMode:(MFSideMenuPanMode)panMode;
 
+- (void) navigationControllerWillAppear;
+- (void) navigationControllerDidAppear;
+- (void) navigationControllerDidDisappear;
+
 - (UIBarButtonItem *) menuBarButtonItem;
 - (UIBarButtonItem *) backBarButtonItem;
 - (void) setupSideMenuBarButtonItem;
