@@ -10,6 +10,8 @@
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 
+#import "KGStartViewController.h"
+
 @interface MFSideMenu() {
     CGPoint panGestureOrigin;
 }
@@ -81,22 +83,29 @@
     MFSideMenu *menu = [[MFSideMenu alloc] init];
     menu.navigationController = controller;
     menu.sideMenuController = menuController;
+    
+    UIView *menuView = menu.sideMenuController.view;
+    CGRect f = menuView.frame;
+    f.size.height -= 44;
+    menuView.frame = f;
+    
     menu.menuSide = side;
     menu.options = options;
     menu.panMode = panMode;
     controller.sideMenu = menu;
+    controller.delegate = menu;
     
-    UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc]
-                                          initWithTarget:menu action:@selector(navigationBarPanned:)];
-	[recognizer setMaximumNumberOfTouches:1];
-    [recognizer setDelegate:menu];
-    [controller.navigationBar addGestureRecognizer:recognizer];
-    
-    recognizer = [[UIPanGestureRecognizer alloc]
-                  initWithTarget:menu action:@selector(navigationControllerPanned:)];
-	[recognizer setMaximumNumberOfTouches:1];
-    [recognizer setDelegate:menu];
-    [controller.view addGestureRecognizer:recognizer];
+//    UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc]
+//                                          initWithTarget:menu action:@selector(navigationBarPanned:)];
+//	[recognizer setMaximumNumberOfTouches:1];
+//    [recognizer setDelegate:menu];
+//    [controller.navigationBar addGestureRecognizer:recognizer];
+//    
+//    recognizer = [[UIPanGestureRecognizer alloc]
+//                  initWithTarget:menu action:@selector(navigationControllerPanned:)];
+//	[recognizer setMaximumNumberOfTouches:1];
+//    [recognizer setDelegate:menu];
+//    [controller.view addGestureRecognizer:recognizer];
     
 //    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]
 //                                             initWithTarget:menu action:@selector(navigationControllerTapped:)];
@@ -117,7 +126,8 @@
 - (void) navigationControllerWillAppear {
     [self setMenuState:MFSideMenuStateHidden];
     
-    if(self.navigationController.viewControllers && self.navigationController.viewControllers.count) {
+//    if (self.navigationController.viewControllers && self.navigationController.viewControllers.count == 1) {
+    if (self.navigationController.viewControllers) {
         // we need to do this b/c the options to show the barButtonItem
         // weren't set yet when viewDidLoad of the topViewController was called
         [self setupSideMenuBarButtonItem];
@@ -135,6 +145,7 @@
     menuView.alpha = 0.0f;
     CGRect f = menuView.frame;
     f.origin.y = 64;
+//    f.size.height -= 44;
     menuView.frame = f;
     
     return;
@@ -221,17 +232,31 @@
 #pragma mark - UIBarButtonItems & Callbacks
 
 - (UIBarButtonItem *)menuBarButtonItem {
-    return [[UIBarButtonItem alloc]
-            initWithImage:[UIImage imageNamed:@"menu-icon-inverted.png"] style:UIBarButtonItemStyleBordered
-            target:self
-            action:@selector(toggleSideMenuPressed:)];
+    UIButton *button = [UIButton buttonWithImage:[UIImage imageNamed:@"menu-icon-inverted.png"]];
+    button.frameWidth = 30;
+    [button addTarget:self action:@selector(toggleSideMenuPressed:) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:button];
+    
+    return item;
+    
+//    return [[UIBarButtonItem alloc]
+//            initWithImage:[UIImage imageNamed:@"menu-icon-inverted.png"] style:UIBarButtonItemStyleBordered
+//            target:self
+//            action:@selector(toggleSideMenuPressed:)];
 }
 
 - (UIBarButtonItem *)backBarButtonItem {
-    return [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back-arrow"]
-                                            style:UIBarButtonItemStyleBordered
-                                           target:self
-                                           action:@selector(backButtonPressed:)];
+    UIButton *button = [UIButton buttonWithImage:[UIImage imageNamed:@"back-arrow.png"]];
+    button.frameWidth = 30;
+    [button addTarget:self action:@selector(backButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:button];
+    
+    return item;
+    
+//    return [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back-arrow"]
+//                                            style:UIBarButtonItemStyleBordered
+//                                           target:self
+//                                           action:@selector(backButtonPressed:)];
 }
 
 - (void) setupSideMenuBarButtonItem {
@@ -531,37 +556,55 @@
 //        duration = animationDurationPerPixel * animationPositionDelta;
 //    }
 //    
-//    if(duration > kMFSideMenuAnimationMaxDuration) duration = kMFSideMenuAnimationMaxDuration;
+    //    if(duration > kMFSideMenuAnimationMaxDuration) duration = kMFSideMenuAnimationMaxDuration;
+    
+    UIView *menuView = self.sideMenuController.view;
+    menuView.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+    menuView.layer.shouldRasterize = YES;
+    self.navigationController.topViewController.view.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+    
+    UIView *windowRootView = self.rootViewController.view;
+    UIView *containerView = windowRootView.superview;
+    
+    
+    if (self.menuState != MFSideMenuStateHidden) {
+        [containerView bringSubviewToFront:menuView];
+    }
     
     [UIView animateWithDuration:duration animations:^{
-        UIView *menuView = self.sideMenuController.view;
-
         if (! hidden) {
             menuView.alpha = 1.f;
-            
+            self.navigationController.topViewController.view.layer.shouldRasterize = YES;
             self.navigationController.topViewController.view.alpha = 0.5;
-//            self.navigationController.sideMenu.sideMenuController.view.alpha = 1.f;
-//            rootController.view.alpha = 0.0;
         }
         else {
             menuView.alpha = 0.f;
+            self.navigationController.topViewController.view.layer.shouldRasterize = YES;
             self.navigationController.topViewController.view.alpha = 1.0;
-//            rootController.view.alpha = 1.0;
         }
         
 //        CGFloat xPosition = (hidden) ? 0 : navigationControllerXPosition;
 //        [self setRootControllerOffset:xPosition];
     } completion:^(BOOL finished) {
+        menuView.layer.shouldRasterize = NO;
+        
+        if (hidden)
+            self.navigationController.topViewController.view.layer.shouldRasterize = NO;
+        
         [self setupSideMenuBarButtonItem];
         
-        UIView *menuView = self.sideMenuController.view;
-        UIView *windowRootView = self.rootViewController.view;
-        UIView *containerView = windowRootView.superview;
-        
-        (self.menuState == MFSideMenuStateHidden) ? [containerView bringSubviewToFront:windowRootView] : [containerView bringSubviewToFront:menuView];
+        if (self.menuState == MFSideMenuStateHidden) {
+            [containerView bringSubviewToFront:windowRootView];
+            [self.navigationController.topViewController viewDidAppear:NO];
+        }
+        else {
+            [containerView bringSubviewToFront:menuView];
+        }
         
         // disable user interaction on the current view controller if the menu is visible
         self.navigationController.topViewController.view.userInteractionEnabled = (self.menuState == MFSideMenuStateHidden);
+        
+        
         
         // notify that the menu state event is done
         [self sendMenuStateEventNotification:(hidden ? MFSideMenuStateEventMenuDidClose : MFSideMenuStateEventMenuDidOpen)];
@@ -618,6 +661,12 @@
     pathRect.size.width = kMFSideMenuShadowWidth;
     
     self.rootViewController.view.layer.shadowPath = [UIBezierPath bezierPathWithRect:pathRect].CGPath;
+}
+
+- (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    if (! [viewController isKindOfClass:[KGStartViewController class]]) {
+        [self setupSideMenuBarButtonItem];
+    }
 }
 
 @end

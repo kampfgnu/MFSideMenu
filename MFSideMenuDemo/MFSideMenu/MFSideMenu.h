@@ -41,7 +41,7 @@ typedef enum {
 
 typedef void (^MFSideMenuStateEventBlock)(MFSideMenuStateEvent);
 
-@interface MFSideMenu : NSObject<UIGestureRecognizerDelegate>
+@interface MFSideMenu : NSObject<UIGestureRecognizerDelegate, UINavigationControllerDelegate>
 
 @property (nonatomic, readonly) UINavigationController *navigationController;
 @property (nonatomic, strong, readonly) UIViewController *sideMenuController;
