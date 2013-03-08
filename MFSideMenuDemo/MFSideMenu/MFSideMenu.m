@@ -10,7 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 
-#import "KGStartViewController.h"
+#import "KHMStartViewController.h"
 
 @interface MFSideMenu() {
     CGPoint panGestureOrigin;
@@ -94,6 +94,8 @@
     menu.panMode = panMode;
     controller.sideMenu = menu;
     controller.delegate = menu;
+    
+    menu.fadeOutContent = YES;
     
 //    UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc]
 //                                          initWithTarget:menu action:@selector(navigationBarPanned:)];
@@ -575,12 +577,12 @@
         if (! hidden) {
             menuView.alpha = 1.f;
             self.navigationController.topViewController.view.layer.shouldRasterize = YES;
-            self.navigationController.topViewController.view.alpha = 0.5;
+            if (_fadeOutContent) self.navigationController.topViewController.view.alpha = 0.5;
         }
         else {
             menuView.alpha = 0.f;
             self.navigationController.topViewController.view.layer.shouldRasterize = YES;
-            self.navigationController.topViewController.view.alpha = 1.0;
+            if (_fadeOutContent) self.navigationController.topViewController.view.alpha = 1.0;
         }
         
 //        CGFloat xPosition = (hidden) ? 0 : navigationControllerXPosition;
@@ -664,7 +666,7 @@
 }
 
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
-    if (! [viewController isKindOfClass:[KGStartViewController class]]) {
+    if (! [viewController isKindOfClass:[KHMStartViewController class]]) {
         [self setupSideMenuBarButtonItem];
     }
 }
